@@ -1,24 +1,20 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
+// main.js (Modificado)
+import { initGameCore, loadScene } from "./modules/gameCore.js"; // Importa las funciones del núcleo del juego
+import { initSocketClient } from "./client.js"; // Importa la función de inicialización de red
+import { setupLobbyScene } from "./modules/levels/1.Stadium/scene/level_1.js";
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+const container = document.body;
 
-setupCounter(document.querySelector('#counter'))
+async function initializeGame() {
+    // 1. ESPERAMOS que el núcleo del juego cargue (incluyendo el modelo GLB)
+    await initGameCore(container, setupLobbyScene); 
+    
+    // 2. SOLO ENTONCES inicializamos el cliente Socket.IO
+    initSocketClient();
+}
+
+initializeGame();
+
+// [OPCIONAL] Función de prueba para cambiar de escena (puedes llamarla desde la consola)
+window.changeToLobby = () => loadScene(setupLobbyScene);
+// window.changeToArena = () => loadScene(setupArenaScene);

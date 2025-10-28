@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+#coordinates {
+    position: absolute;
+    /* Posiciona sobre el canvas */
+    top: 10px;
+    left: 10px;
+    color: white;
+    /* Color claro para ser visible */
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Fondo semitransparente */
+    padding: 8px;
+    font-family: monospace;
+    z-index: 100;
+    /* Asegura que esté por encima del canvas */
+    border-radius: 4px;
+}
