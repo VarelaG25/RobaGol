@@ -19,17 +19,30 @@ function createPlayerTag(text) {
 
 // Función auxiliar para crear y agregar el cubo del jugador remoto (AZUL)
 function createOtherPlayerMesh(id, data) {
-  const geometry = new THREE.BoxGeometry(1, 2, 1);
-  const material = new THREE.MeshStandardMaterial({ color: 0x0000ff });
-  const mesh = new THREE.Mesh(geometry, material);
+  
+  let mesh;
 
-  // Aplica posición inicial Y la rotación
+  // 1. Comprobar si la plantilla del modelo está lista (si no, usamos cubo de respaldo)
+  if (window.playerModelTemplate) {
+      mesh = window.playerModelTemplate.clone();
+  } else {
+      console.warn("Modelo no cargado. Usando cubo de respaldo para jugador remoto.");
+      const geometry = new THREE.BoxGeometry(1, 2, 1);
+      const material = new THREE.MeshStandardMaterial({ color: 0x0000ff });
+      // 🥳 ¡IMPORTANTE! Asegúrate de asignar el valor A LA VARIABLE mesh
+      mesh = new THREE.Mesh(geometry, material); 
+  }
+
+  // Aplica posición y rotación iniciales
   mesh.position.set(data.x, data.y, data.z);
-  mesh.rotation.y = data.ry || 0; // <--- Aplica rotación inicial
-
+  mesh.rotation.y = data.ry || 0; 
+  
+  // Creamos la etiqueta
   const tag = createPlayerTag(id.substring(0, 5));
+  
+  // 🥳 Aquí usamos mesh.add(tag), y mesh ya no es 'undefined'
   mesh.add(tag); 
-
+  
   window.scene.add(mesh);
   otherPlayers[id] = mesh;
 }

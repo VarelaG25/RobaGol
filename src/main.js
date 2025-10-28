@@ -5,11 +5,15 @@ import { setupLobbyScene } from "./modules/levels/1.Stadium/scene/level_1.js";
 
 const container = document.body;
 
-// 1. Inicializar el núcleo del juego y cargar la escena inicial
-initGameCore(container, setupLobbyScene); 
+async function initializeGame() {
+    // 1. ESPERAMOS que el núcleo del juego cargue (incluyendo el modelo GLB)
+    await initGameCore(container, setupLobbyScene); 
+    
+    // 2. SOLO ENTONCES inicializamos el cliente Socket.IO
+    initSocketClient();
+}
 
-// 2. Inicializar el cliente Socket.IO
-initSocketClient(); 
+initializeGame();
 
 // [OPCIONAL] Función de prueba para cambiar de escena (puedes llamarla desde la consola)
 window.changeToLobby = () => loadScene(setupLobbyScene);
