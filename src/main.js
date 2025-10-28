@@ -1,9 +1,11 @@
-import './style.css';
-import $ from 'jquery';
-import initScene from './modules/scene/scene.js';
+// main.js
+import initScene from "./modules/scene.js";
+import { initSocketClient } from "./client.js"; // Importar la función de inicialización del cliente
 
-// Insertar un contenedor para la escena
-$('body').append('<div id="app"></div>');
+const container = document.body;
 
-// Inicializar la escena dentro del div
-initScene($('#app')[0]);
+// 1. Inicializar la escena y definir las variables globales (window.scene, window.player)
+initScene(container);
+
+// 2. SOLO DESPUÉS, inicializar el cliente de Socket.IO
+initSocketClient();

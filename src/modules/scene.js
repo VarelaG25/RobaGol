@@ -1,58 +1,49 @@
+// scene.js
 import * as THREE from "three";
-import $ from "jquery";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls.js";
+import $ from "jquery";
 
 export default function initScene(container) {
-  // 1️⃣ Escena
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xa0a0a0);
 
-  // 2️⃣ Cámara
   const camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
   );
-  camera.position.set(0, 1.8, 5); // altura player
-  camera.lookAt(0, 0, 0);
+  camera.position.set(0, 1.8, 5);
 
-  // 3️⃣ Render
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   $(container).append(renderer.domElement);
 
-  // 4️⃣ Luces
-  const light = new THREE.DirectionalLight(0xffffff, 1);
-  light.position.set(10, 20, 10);
-  scene.add(light);
+  // Luces
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+  dirLight.position.set(10, 20, 10);
+  scene.add(dirLight);
 
   const ambient = new THREE.AmbientLight(0x404040, 1.5);
   scene.add(ambient);
 
-  // 5️⃣ Helpers
-  const axesHelper = new THREE.AxesHelper(5);
-  scene.add(axesHelper);
-
-  const gridHelper = new THREE.GridHelper(200, 50);
-  scene.add(gridHelper);
-
-  // 6️⃣ Terreno plano
-  const terrainGeo = new THREE.PlaneGeometry(200, 200);
-  terrainGeo.rotateX(-Math.PI / 2);
-
-  const terrainMat = new THREE.MeshStandardMaterial({ color: 0x228b22 });
-  const terrain = new THREE.Mesh(terrainGeo, terrainMat);
+  // Terreno verde
+  const terrain = new THREE.Mesh(
+    new THREE.PlaneGeometry(200, 200),
+    new THREE.MeshStandardMaterial({ color: 0x228b22 })
+  );
+  terrain.rotateX(-Math.PI / 2);
   scene.add(terrain);
 
-  // 7️⃣ Cubo de referencia
-  const cubeGeo = new THREE.BoxGeometry(1, 1, 1);
-  const cubeMat = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-  const cube = new THREE.Mesh(cubeGeo, cubeMat);
-  cube.position.set(0, 0.5, 0); // medio sobre el suelo
-  scene.add(cube);
+  // Cubo jugador (Este es tu propio cubo, el que mueves)
+  const player = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 2, 1),
+    new THREE.MeshStandardMaterial({ color: 0xff0000 })
+  );
+  player.position.set(0, 1, 0);
+  scene.add(player);
 
-  // 8️⃣ Controles FPS
+  // Controles FPS
   const controls = new PointerLockControls(camera, renderer.domElement);
   $(document.body).click(() => controls.lock());
 
@@ -73,25 +64,8 @@ export default function initScene(container) {
     if (e.code === "KeyD") move.right = false;
   });
 
-  // 9️⃣ Coordenadas en pantalla
-  const $coordDiv = $('<div id="coords"></div>').css({
-    position: "absolute",
-    top: "10px",
-    left: "10px",
-    color: "white",
-    fontFamily: "monospace",
-  });
-  $(container).append($coordDiv);
-
-  function showCoordinates(x, y, z) {
-    $coordDiv.text(
-      `X: ${x.toFixed(2)}, Y: ${y.toFixed(2)}, Z: ${z.toFixed(2)}`
-    );
-  }
-
   const clock = new THREE.Clock();
 
-  // 10️⃣ Animación
   function animate() {
     requestAnimationFrame(animate);
 
@@ -107,19 +81,28 @@ export default function initScene(container) {
     controls.moveRight(velocity.x);
     controls.moveForward(-velocity.z);
 
-    // obtener posición directamente de la cámara
-    const pos = camera.position;
-    showCoordinates(pos.x, pos.y, pos.z);
+    // Mantener mesh del jugador en la posición de la cámara
+    const camPos = camera.position;
+    player.position.set(camPos.x, 1, camPos.z);
+    
+    // [MODIFICACIÓN CLAVE] Enviar posición en el bucle de animación
+    if (window.sendPlayerPosition) {
+        window.sendPlayerPosition(player.position);
+    }
 
     renderer.render(scene, camera);
   }
-
   animate();
 
-  // 11️⃣ Redimensionar
   $(window).on("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
+
+  // Exponer globales
+  window.player = player;
+  window.scene = scene;
+
+  return { camera, player, scene };
 }
